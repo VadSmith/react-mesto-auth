@@ -33,7 +33,7 @@ export default function EditProfilePopup(props) {
   useEffect(() => {
     setName(currentUser.name);
     setDescription(currentUser.about);
-  }, [currentUser, props.isOpen]); // Добрый день. Так верно? Вроде работает.
+  }, [currentUser, props.isOpen]);
 
   return (
 

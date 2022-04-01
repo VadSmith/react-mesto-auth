@@ -2,17 +2,8 @@ import React, { useRef } from 'react';
 import PopupWithForm from "./PopupWithForm";
 
 export default function AddPlacePopup(props) {
-  // const [cardName, setCardName] = useState(false);
-  // const [cardLink, setCardLink] = useState(false);
   const cardNameRef = useRef();
   const cardLinkRef = useRef();
-
-  // function handleCardNameChange(event) {
-  //   setCardName(event.target.value);
-  // }
-  // function handleCardLinkChange(event) {
-  //   setCardLink(event.target.value);
-  // }
 
   function handleSubmit(e) {
     e.preventDefault();

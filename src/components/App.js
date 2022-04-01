@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import Header from './Header.js';
 import Main from './Main.js';
 import Footer from './Footer.js';
@@ -8,32 +9,58 @@ import EditAvatarPopup from './EditAvatarPopup.js';
 import AddPlacePopup from './AddPlacePopup.js';
 import api from '../utils/api.js';
 import CurrentUserContext from '../contexts/CurrentUserContext';
+import Login from './Login.js';
+import Register from './Register.js';
+import ProtectedRoute from './ProtectedRoute.js';
+import * as mestoAuth from '../utils/mestoAuth.js';
+import InfoTooltip from './InfoTooltip.js';
+// import PageNotFound from './PageNotFound.js';
 
 function App() {
-  const [currentUser, setCurrentUser] = useState({ name: '', about: '', avatar: '', _id: '' });
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [cards, setCards] = useState([]);
+  const [isRegistered, setIsRegistered] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const history = useHistory();
 
-
-  useEffect(() => {
-    api.getInitialCards()
-      .then((cardsJSON) => {
-        setCards(cardsJSON);
-      })
-      .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
-  }, [])
+  const [currentUser, setCurrentUser] = useState({ name: '', about: '', avatar: '', _id: '' });
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState('');
 
   useEffect(() => {
-    api.getMyUserInfo()
-      .then((userData) => {
-        setCurrentUser(userData);
-      })
-      .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
-  }, [])
+    tokenCheck()
+  }, [loggedIn])
 
+  useEffect(() => {
+    if (loggedIn) {
+      history.push("/")
+    }
+  }, [loggedIn, email])
+
+  useEffect(() => {
+    if (loggedIn) {
+      api.getInitialCards()
+        .then((cardsJSON) => {
+          console.log('getInitialCards');
+          setCards(cardsJSON);
+        })
+        .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
+    }
+  }, [loggedIn])
+
+  useEffect(() => {
+    if (loggedIn) {
+      api.getMyUserInfo()
+        .then((res) => {
+          console.log('getMyUserInfo');
+          setCurrentUser(res);
+        })
+        .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
+    }
+  }, [loggedIn])
 
   function handleCardClick(cardJSON) {
     setSelectedCard(cardJSON);
@@ -93,6 +120,7 @@ function App() {
         closeAllPopups()
       )
   }
+
   // Добавление карточи
   function handleAddPlace(cardObject) {
     api.addCard(cardObject)
@@ -105,11 +133,71 @@ function App() {
       )
   }
 
+  // Регистрация
+  function handleRegister(email, password) {
+    return mestoAuth.register(email, password).then(() => {
+      // console.log('удачная регистрация');
+      setIsRegistered(true);
+    })
+      .catch((err) => {
+        // console.log('неудачная регистрация');
+        console.log(err);
+      })
+      .finally(() => setIsInfoTooltipOpen(true));
+    ;
+  }
+
+  // После удачной регистрации
+  useEffect(() => {
+    if (!isInfoTooltipOpen && isRegistered) {
+      setIsRegistered(false);
+      history.push('/sign-in');
+    }
+  }, [isInfoTooltipOpen]);
+
+  function handleLogin(email, password) {
+    // console.log('handle login');
+    return mestoAuth.login(email, password)
+      .then((data) => {
+        if (data.token) {
+          localStorage.setItem('jwt', data.token);
+          setLoggedIn(true);
+          // history.push('/');
+        }
+      }
+      )
+  }
+
+  // Проверка токена в локальной базе
+  function tokenCheck() {
+    // console.log('token check');
+    if (localStorage.getItem('jwt')) {
+      let jwt = localStorage.getItem('jwt');
+      mestoAuth.getContent(jwt).then((res) => {
+        setEmail(res.data.email);
+        setLoggedIn(true);
+      }
+      );
+    }
+  }
+
+  // Разлогиниться
+  function signOut() {
+    // console.log('signOut');
+    localStorage.removeItem('jwt');
+    setLoggedIn(false);
+    setCurrentUser({ name: '', about: '', avatar: '', _id: '' });
+    setEmail('');
+    history.push('/sign-in');
+  }
+
+
   // Закрыть все попапы
   function closeAllPopups() {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
+    setIsInfoTooltipOpen(false);
     setSelectedCard(null);
   }
 
@@ -117,19 +205,53 @@ function App() {
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
 
-        <Header />
-
-        <Main
-          cards={cards}
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={handleCardClick}
-          onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
+        <Header
+          loggedIn={loggedIn}
+          signOut={signOut}
+          email={email}
         />
 
-        <Footer />
+        <Switch>
+
+          <ProtectedRoute
+            exact
+            path="/"
+            component={Main}
+            loggedIn={loggedIn}
+            cards={cards}
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onEditAvatar={handleEditAvatarClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+          />
+
+
+          <Route path="/sign-up">
+            <Register handleRegister={handleRegister} />
+            <InfoTooltip
+              isOpen={isInfoTooltipOpen}
+              onClose={closeAllPopups}
+              isRegistered={isRegistered}
+            />
+          </Route>
+
+          <Route path="/sign-in">
+            <Login
+              handleLogin={handleLogin}
+            />
+          </Route>
+
+          <Route>
+            {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
+          </Route>
+
+        </Switch>
+
+        <Route exact path="/">
+          <Footer />
+        </Route>
 
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
@@ -154,6 +276,7 @@ function App() {
           card={selectedCard}
           onClose={closeAllPopups}
         />
+
 
       </div>
 

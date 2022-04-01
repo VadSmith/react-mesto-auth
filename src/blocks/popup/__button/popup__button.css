@@ -18,7 +18,7 @@
 }
 
 .popup__button:hover {
-  cursor: url(../../../images/pointer.png) 10 0, pointer;
+  cursor: pointer;
   opacity: 0.8;
 }
 
