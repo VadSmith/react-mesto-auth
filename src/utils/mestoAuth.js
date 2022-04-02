@@ -5,6 +5,9 @@ export const checkResponse = (response) => {
 
     return response.json()
   }
+
+  // return Promise.reject(response.json());
+
   return response.json().then((data) => {
     const { statusCode } = data;
     const { message } = data;
@@ -24,6 +27,7 @@ export const register = (email, password) => {
     },
     body: JSON.stringify({ email, password })
   })
+    // .then(data => data)
     .then(checkResponse)
 }
 

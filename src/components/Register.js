@@ -24,9 +24,6 @@ function Register(props) {
   function handleSubmit(e) {
     e.preventDefault();
     props.handleRegister(email, password)
-      .catch((err) => {
-        setData({ ...data, message: err.message });
-      })
   }
 
   return (

@@ -22,7 +22,6 @@ function Login(props) {
   function handleSubmit(e) {
     e.preventDefault();
     props.handleLogin(email, password)
-      .catch((err) => setData({ ...data, message: err.message }))
   }
 
   return (

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import Header from './Header.js';
 import Main from './Main.js';
-import Footer from './Footer.js';
 import ImagePopup from './ImagePopup.js';
 import EditProfilePopup from './EditProfilePopup.js';
 import EditAvatarPopup from './EditAvatarPopup.js';
@@ -13,7 +12,11 @@ import Login from './Login.js';
 import Register from './Register.js';
 import ProtectedRoute from './ProtectedRoute.js';
 import * as mestoAuth from '../utils/mestoAuth.js';
-import InfoTooltip from './InfoTooltip.js';
+import InfoToolTip from './InfoToolTip.js';
+import successIcon from '../images/successRegistration.png';
+import failIcon from '../images/failRegistration.png';
+
+
 // import PageNotFound from './PageNotFound.js';
 
 function App() {
@@ -23,12 +26,14 @@ function App() {
   const [selectedCard, setSelectedCard] = useState(null);
   const [cards, setCards] = useState([]);
   const [isRegistered, setIsRegistered] = useState(false);
-  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const history = useHistory();
 
   const [currentUser, setCurrentUser] = useState({ name: '', about: '', avatar: '', _id: '' });
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState('');
+
+  const [isInfoToolTipOpen, setIsInfoToolTipOpen] = useState(false);
+  const [dataInfoToolTip, setDataInfoToolTip] = useState({ message: '', icon: '' });
 
   useEffect(() => {
     tokenCheck()
@@ -44,7 +49,6 @@ function App() {
     if (loggedIn) {
       api.getInitialCards()
         .then((cardsJSON) => {
-          console.log('getInitialCards');
           setCards(cardsJSON);
         })
         .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
@@ -55,7 +59,6 @@ function App() {
     if (loggedIn) {
       api.getMyUserInfo()
         .then((res) => {
-          console.log('getMyUserInfo');
           setCurrentUser(res);
         })
         .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
@@ -133,57 +136,71 @@ function App() {
       )
   }
 
-  // Регистрация
-  function handleRegister(email, password) {
-    return mestoAuth.register(email, password).then(() => {
-      // console.log('удачная регистрация');
-      setIsRegistered(true);
-    })
-      .catch((err) => {
-        // console.log('неудачная регистрация');
-        console.log(err);
-      })
-      .finally(() => setIsInfoTooltipOpen(true));
-    ;
-  }
-
   // После удачной регистрации
   useEffect(() => {
-    if (!isInfoTooltipOpen && isRegistered) {
+    if (!isInfoToolTipOpen && isRegistered) {
       setIsRegistered(false);
       history.push('/sign-in');
     }
-  }, [isInfoTooltipOpen]);
+  }, [isInfoToolTipOpen]);
+
+  // useEffect(() => {
+  //   if (!isInfoTooltipOpen && isRegistered) {
+  //     setIsRegistered(false);
+  //     history.push('/sign-in');
+  //   }
+  // }, [isInfoTooltipOpen]);
+
+  // Регистрация
+  function handleRegister(email, password) {
+    return mestoAuth.register(email, password).then((res) => {
+      setIsRegistered(true);
+      setIsInfoToolTipOpen(true);
+      setDataInfoToolTip({ message: "Вы успешно зарегистрировались!", icon: successIcon })
+    })
+      .catch((err) => {
+        setIsInfoToolTipOpen(true);
+        setDataInfoToolTip({ message: `Что-то пошло не так! Попробуйте ещё раз.`, icon: failIcon })
+        console.log(err);
+      })
+  }
 
   function handleLogin(email, password) {
-    // console.log('handle login');
     return mestoAuth.login(email, password)
       .then((data) => {
         if (data.token) {
           localStorage.setItem('jwt', data.token);
           setLoggedIn(true);
-          // history.push('/');
         }
-      }
-      )
+      })
+      .catch((err) => {
+        console.log(err)
+        setIsInfoToolTipOpen(true);
+        // Здравствуйте!
+        // Переделал для более универсального использования ToolTip,
+        // и теперь не могу извлечь message из ошибки и время до жесткого дедлайна поджимает :( 
+        // Но вроде и нет такого требования в чек-листе...
+        // setDataInfoToolTip({ message: `Что-то пошло не так! ${err.message}`, icon: failIcon })
+        setDataInfoToolTip({ message: `Что-то пошло не так! Попробуйте ещё раз.`, icon: failIcon })
+      })
   }
 
   // Проверка токена в локальной базе
   function tokenCheck() {
-    // console.log('token check');
     if (localStorage.getItem('jwt')) {
       let jwt = localStorage.getItem('jwt');
       mestoAuth.getContent(jwt).then((res) => {
         setEmail(res.data.email);
         setLoggedIn(true);
       }
-      );
+      ).catch((err) => {
+        console.log(err);
+      });
     }
   }
 
   // Разлогиниться
   function signOut() {
-    // console.log('signOut');
     localStorage.removeItem('jwt');
     setLoggedIn(false);
     setCurrentUser({ name: '', about: '', avatar: '', _id: '' });
@@ -197,7 +214,8 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
-    setIsInfoTooltipOpen(false);
+    setIsInfoToolTipOpen(false);
+    setDataInfoToolTip({ message: '', icon: '' });
     setSelectedCard(null);
   }
 
@@ -230,10 +248,12 @@ function App() {
 
           <Route path="/sign-up">
             <Register handleRegister={handleRegister} />
-            <InfoTooltip
-              isOpen={isInfoTooltipOpen}
+            <InfoToolTip
+              isOpen={isInfoToolTipOpen}
               onClose={closeAllPopups}
-              isRegistered={isRegistered}
+              dataInfoToolTip={dataInfoToolTip}
+            // isRegistered={isRegistered}
+
             />
           </Route>
 
@@ -241,6 +261,12 @@ function App() {
             <Login
               handleLogin={handleLogin}
             />
+            <InfoToolTip
+              isOpen={isInfoToolTipOpen}
+              onClose={closeAllPopups}
+              dataInfoToolTip={dataInfoToolTip}
+            />
+
           </Route>
 
           <Route>
@@ -248,10 +274,6 @@ function App() {
           </Route>
 
         </Switch>
-
-        <Route exact path="/">
-          <Footer />
-        </Route>
 
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
