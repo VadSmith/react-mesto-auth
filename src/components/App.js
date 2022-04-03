@@ -47,24 +47,36 @@ function App() {
 
   useEffect(() => {
     if (loggedIn) {
-      api.getInitialCards()
-        .then((cardsJSON) => {
-          setCards(cardsJSON);
+      Promise.all([api.getMyUserInfo(), api.getInitialCards()])
+        .then(([user, cardsRes]) => {
+          setCurrentUser(user);
+          setCards(cardsRes);
         })
-        .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
+        .catch((err) => console.log(err));
     }
-  }, [loggedIn])
+  }, [loggedIn]);
 
-  useEffect(() => {
-    if (loggedIn) {
-      api.getMyUserInfo()
-        .then((res) => {
-          setCurrentUser(res);
-        })
-        .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
-    }
-  }, [loggedIn])
+  ///////////////////////////////////////////////////////////
+  // useEffect(() => {
+  //   if (loggedIn) {
+  //     api.getInitialCards()
+  //       .then((cardsJSON) => {
+  //         setCards(cardsJSON);
+  //       })
+  //       .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
+  //   }
+  // }, [loggedIn])
 
+  // useEffect(() => {
+  //   if (loggedIn) {
+  //     api.getMyUserInfo()
+  //       .then((res) => {
+  //         setCurrentUser(res);
+  //       })
+  //       .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
+  //   }
+  // }, [loggedIn])
+  ////////////////////////////////////////////////////////////
   function handleCardClick(cardJSON) {
     setSelectedCard(cardJSON);
   }
@@ -201,9 +213,11 @@ function App() {
 
   // Разлогиниться
   function signOut() {
+    // debugger
     localStorage.removeItem('jwt');
     setLoggedIn(false);
     setCurrentUser({ name: '', about: '', avatar: '', _id: '' });
+    // setCards({}); // видимо ломает загрузку обратно после повторного логина
     setEmail('');
     history.push('/sign-in');
   }
