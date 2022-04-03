@@ -32,6 +32,7 @@ function Login(props) {
         buttonText="Войти"
       >
         <input
+          value={email}
           name='email'
           type="email"
           onChange={handleChange}
@@ -43,6 +44,7 @@ function Login(props) {
         </input>
 
         <input
+          value={password}
           name='password'
           type="password"
           onChange={handleChange}

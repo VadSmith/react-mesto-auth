@@ -34,6 +34,7 @@ function Register(props) {
         buttonText="Зарегистрироваться"
       >
         <input
+          value={email}
           onChange={handleChange}
           name="email"
           className="form__input form__input_type_email"
@@ -44,6 +45,7 @@ function Register(props) {
         </input>
 
         <input
+          value={password}
           onChange={handleChange}
           name="password"
           className="form__input form__input_type_password"
