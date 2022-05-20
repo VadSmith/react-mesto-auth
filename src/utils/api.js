@@ -1,11 +1,12 @@
 class Api {
-  constructor({ address, token }) {
+  // constructor({ address, token }) {
+  constructor(address) {
     this._address = address;
     // this._cohortId = cohortId;
-    this._token = token;
+    // this._token = token;
     this._headers = {
       'Content-Type': 'application/json',
-      authorization: this._token
+      // authorization: this._token
     };
 
   }
@@ -18,7 +19,8 @@ class Api {
 
   getMyUserInfo() {
     return fetch(`${this._address}/users/me`, {
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
     })
       .then(this._checkResponse);
   }
@@ -37,7 +39,9 @@ class Api {
 
   getInitialCards() {
     return fetch(`${this._address}/cards`, {
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
+
     })
       .then(this._checkResponse);
   }
@@ -46,6 +50,7 @@ class Api {
     return fetch(`${this._address}/users/me/avatar/`, {
       method: 'PATCH',
       headers: this._headers,
+      credentials: 'include',
       body: JSON.stringify({
         avatar: avatarObject.avatar
       })
@@ -57,6 +62,7 @@ class Api {
     return fetch(`${this._address}/cards/`, {
       method: 'POST',
       headers: this._headers,
+      credentials: 'include',
       body: JSON.stringify({
         name: cardObject.name,
         link: cardObject.link
@@ -69,6 +75,7 @@ class Api {
     return fetch(`${this._address}/cards/${cardId}`, {
       method: 'DELETE',
       headers: this._headers,
+      credentials: 'include',
     })
       .then(this._checkResponse)
   }
@@ -76,7 +83,8 @@ class Api {
   putLike(cardJSON) {
     return fetch(`${this._address}/cards/${cardJSON._id}/likes`, {
       method: 'PUT',
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
     })
       .then(this._checkResponse);
   }
@@ -84,7 +92,8 @@ class Api {
   changeLikeCardStatus(card_id, isLiked) {
     return fetch(`${this._address}/cards/${card_id}/likes`, {
       method: isLiked ? 'PUT' : 'DELETE',
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
     })
       .then(this._checkResponse);
   }
@@ -92,16 +101,20 @@ class Api {
   deleteLike(cardJSON) {
     return fetch(`${this._address}/cards/${cardJSON._id}/likes`, {
       method: 'DELETE',
-      headers: this._headers
+      headers: this._headers,
+      credentials: 'include',
+
     })
       .then(this._checkResponse);
 
   }
 }
-const api = new Api({
-  address: 'https://mesto.nomoreparties.co/v1/cohort-35',
-  token: '0dd0d459-95f6-44a8-af29-6effe65b34b3'
-})
+const api = new Api('https://api.vad.nomoreparties.sbs');
+// const api = new Api({
+//   address: 'https://mesto.nomoreparties.co/v1/cohort-35',
+
+//   token: '0dd0d459-95f6-44a8-af29-6effe65b34b3'
+// })
 
 
 

@@ -1,13 +1,14 @@
-export const BASE_URL = 'https://auth.nomoreparties.co';
+// export const BASE_URL = 'https://auth.nomoreparties.co';
+export const BASE_URL = 'https://api.vad.nomoreparties.sbs';
+// export const BASE_URL = 'https://vad.nomoredomains.xyz';
+// export const BASE_URL = 'http://localhost:3000';
 
 export const checkResponse = (response) => {
   if (response.ok) {
 
     return response.json()
   }
-
   // return Promise.reject(response.json());
-
   return response.json().then((data) => {
     const { statusCode } = data;
     const { message } = data;
@@ -17,7 +18,6 @@ export const checkResponse = (response) => {
   })
 }
 
-
 export const register = (email, password) => {
   return fetch(`${BASE_URL}/signup`, {
     method: 'POST',
@@ -25,9 +25,9 @@ export const register = (email, password) => {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password })
   })
-    // .then(data => data)
     .then(checkResponse)
 }
 
@@ -39,20 +39,24 @@ export const login = (email, password) => {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     },
+    credentials: 'include',
     body: JSON.stringify({ email, password })
   })
     .then(checkResponse)
 };
 
 
-export const getContent = (token) => {
+// export const getContent = (token) => {
+export const getUserInfo = () => {
+  // console.log('getUserInfo-jwt', jwt);
   return fetch(`${BASE_URL}/users/me`, {
     method: 'GET',
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
-    }
+      // 'Authorization': `Bearer ${jwt}`,
+    },
+    credentials: 'include'
   })
     .then(res => res.json())
     .then(data => data)

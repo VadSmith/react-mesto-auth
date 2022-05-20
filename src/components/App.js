@@ -35,8 +35,10 @@ function App() {
   const [isInfoToolTipOpen, setIsInfoToolTipOpen] = useState(false);
   const [dataInfoToolTip, setDataInfoToolTip] = useState({ message: '', icon: '' });
 
+  // let jwt = localStorage.getItem('jwt');
+
   useEffect(() => {
-    tokenCheck()
+    tokenCheck();
   }, [loggedIn])
 
   useEffect(() => {
@@ -44,6 +46,19 @@ function App() {
       history.push("/")
     }
   }, [loggedIn, email])
+
+
+
+
+  // console.log('before const api', localStorage.getItem('jwt'))
+
+  // const api = new Api('https://api.vad.nomoreparties.sbs', localStorage.getItem('jwt'));
+
+
+
+
+
+
 
   useEffect(() => {
     if (loggedIn) {
@@ -188,27 +203,27 @@ function App() {
       .catch((err) => {
         console.log(err)
         setIsInfoToolTipOpen(true);
-        // Здравствуйте!
-        // Переделал для более универсального использования ToolTip,
-        // и теперь не могу извлечь message из ошибки и время до жесткого дедлайна поджимает :( 
-        // Но вроде и нет требования о статусе ошибки в ToolTip в задании и чек-листе...
         // setDataInfoToolTip({ message: `Что-то пошло не так! ${err.message}`, icon: failIcon })
-        setDataInfoToolTip({ message: `Что-то пошло не так! Попробуйте ещё раз.`, icon: failIcon })
+        setDataInfoToolTip({
+          message: `Что-то пошло не так! Попробуйте ещё раз.`,
+          icon: failIcon
+        })
       })
   }
 
   // Проверка токена в локальной базе
   function tokenCheck() {
-    if (localStorage.getItem('jwt')) {
-      let jwt = localStorage.getItem('jwt');
-      mestoAuth.getContent(jwt).then((res) => {
-        setEmail(res.data.email);
-        setLoggedIn(true);
-      }
-      ).catch((err) => {
-        console.log(err);
-      });
+    // if (localStorage.getItem('jwt')) {
+    // let jwt = localStorage.getItem('jwt');
+    // console.log('tokencheck-jwt', jwt);
+    mestoAuth.getUserInfo().then((res) => {
+      setEmail(res.data.email);
+      setLoggedIn(true);
     }
+    ).catch((err) => {
+      console.log(err);
+    });
+    // }
   }
 
   // Разлогиниться
