@@ -35,8 +35,6 @@ function App() {
   const [isInfoToolTipOpen, setIsInfoToolTipOpen] = useState(false);
   const [dataInfoToolTip, setDataInfoToolTip] = useState({ message: '', icon: '' });
 
-  // let jwt = localStorage.getItem('jwt');
-
   useEffect(() => {
     tokenCheck();
   }, [loggedIn])
@@ -46,19 +44,6 @@ function App() {
       history.push("/")
     }
   }, [loggedIn, email])
-
-
-
-
-  // console.log('before const api', localStorage.getItem('jwt'))
-
-  // const api = new Api('https://api.vad.nomoreparties.sbs', localStorage.getItem('jwt'));
-
-
-
-
-
-
 
   useEffect(() => {
     if (loggedIn) {
@@ -71,27 +56,6 @@ function App() {
     }
   }, [loggedIn]);
 
-  ///////////////////////////////////////////////////////////
-  // useEffect(() => {
-  //   if (loggedIn) {
-  //     api.getInitialCards()
-  //       .then((cardsJSON) => {
-  //         setCards(cardsJSON);
-  //       })
-  //       .catch(err => `ОШИБКА! Не удалось получить карточки: ${err}`)
-  //   }
-  // }, [loggedIn])
-
-  // useEffect(() => {
-  //   if (loggedIn) {
-  //     api.getMyUserInfo()
-  //       .then((res) => {
-  //         setCurrentUser(res);
-  //       })
-  //       .catch(err => `ОШИБКА! Не удалось получить данные пользователя: ${err}`)
-  //   }
-  // }, [loggedIn])
-  ////////////////////////////////////////////////////////////
   function handleCardClick(cardJSON) {
     setSelectedCard(cardJSON);
   }
@@ -195,10 +159,11 @@ function App() {
   function handleLogin(email, password) {
     return mestoAuth.login(email, password)
       .then((data) => {
-        if (data.token) {
-          localStorage.setItem('jwt', data.token);
-          setLoggedIn(true);
-        }
+        // console.log(data.json());
+        // if (data.token) {
+        // localStorage.setItem('jwt', data.token);
+        setLoggedIn(true);
+        // }
       })
       .catch((err) => {
         console.log(err)

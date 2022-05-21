@@ -1,6 +1,5 @@
 // export const BASE_URL = 'https://auth.nomoreparties.co';
 export const BASE_URL = 'https://api.vad.nomoreparties.sbs';
-// export const BASE_URL = 'https://vad.nomoredomains.xyz';
 // export const BASE_URL = 'http://localhost:3000';
 
 export const checkResponse = (response) => {
@@ -48,7 +47,6 @@ export const login = (email, password) => {
 
 // export const getContent = (token) => {
 export const getUserInfo = () => {
-  // console.log('getUserInfo-jwt', jwt);
   return fetch(`${BASE_URL}/users/me`, {
     method: 'GET',
     headers: {
@@ -56,8 +54,9 @@ export const getUserInfo = () => {
       'Content-Type': 'application/json',
       // 'Authorization': `Bearer ${jwt}`,
     },
-    credentials: 'include'
+    credentials: 'include',
   })
-    .then(res => res.json())
+    // .then(res => res.json())
     .then(data => data)
+    .then(checkResponse);
 }
