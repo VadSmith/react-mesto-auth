@@ -45,8 +45,19 @@ export const login = (email, password) => {
 };
 
 
+export const logout = () => {
+  return fetch(`${BASE_URL}/logout`, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+    .then(checkResponse);
+}
+
 // export const getContent = (token) => {
-export const getUserInfo = () => {
+export const getMyInfo = () => {
   return fetch(`${BASE_URL}/users/me`, {
     method: 'GET',
     headers: {
@@ -57,6 +68,6 @@ export const getUserInfo = () => {
     credentials: 'include',
   })
     // .then(res => res.json())
-    .then(data => data)
-    .then(checkResponse);
+    // .then(data => data)
+    .then(checkResponse)
 }

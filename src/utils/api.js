@@ -2,6 +2,7 @@ class Api {
   constructor(address) {
     this._address = address;
     this._headers = {
+      'Accept': 'application/json',
       'Content-Type': 'application/json',
     };
 
@@ -99,13 +100,12 @@ class Api {
       method: 'DELETE',
       headers: this._headers,
       credentials: 'include',
-
     })
       .then(this._checkResponse);
-
   }
 }
 const api = new Api('https://api.vad.nomoreparties.sbs');
+// const api = new Api('http://localhost:3000');
 
 // const api = new Api({
 //   address: 'https://mesto.nomoreparties.co/v1/cohort-35',

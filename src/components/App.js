@@ -135,12 +135,6 @@ function App() {
     }
   }, [isInfoToolTipOpen]);
 
-  // useEffect(() => {
-  //   if (!isInfoTooltipOpen && isRegistered) {
-  //     setIsRegistered(false);
-  //     history.push('/sign-in');
-  //   }
-  // }, [isInfoTooltipOpen]);
 
   // Регистрация
   function handleRegister(email, password) {
@@ -158,13 +152,19 @@ function App() {
 
   function handleLogin(email, password) {
     return mestoAuth.login(email, password)
-      .then((data) => {
-        // console.log(data.json());
-        // if (data.token) {
-        // localStorage.setItem('jwt', data.token);
+      .then((res) => {
         setLoggedIn(true);
-        // }
+        // setEmail(res.email);
+        history.push('/')
       })
+
+      // .then((data) => {
+      //   // console.log(data.json());
+      //   // if (data.token) {
+      //   // localStorage.setItem('jwt', data.token);
+      //   setLoggedIn(true);
+      //   // }
+      // })
       .catch((err) => {
         console.log(err)
         setIsInfoToolTipOpen(true);
@@ -178,28 +178,28 @@ function App() {
 
   // Проверка токена в локальной базе
   function tokenCheck() {
-    // if (localStorage.getItem('jwt')) {
-    // let jwt = localStorage.getItem('jwt');
-    // console.log('tokencheck-jwt', jwt);
-    mestoAuth.getUserInfo().then((res) => {
-      setEmail(res.data.email);
-      setLoggedIn(true);
+    if (loggedIn) {
+      mestoAuth.getMyInfo()
+        .then((res) => {
+          setEmail(res.email);
+          setLoggedIn(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
-    ).catch((err) => {
-      console.log(err);
-    });
-    // }
   }
 
   // Разлогиниться
   function signOut() {
-    // debugger
-    localStorage.removeItem('jwt');
-    setLoggedIn(false);
-    setCurrentUser({ name: '', about: '', avatar: '', _id: '' });
-    // setCards({}); // видимо ломает загрузку обратно после повторного логина
-    setEmail('');
-    history.push('/sign-in');
+    // localStorage.removeItem('jwt');
+    mestoAuth.logout().then(() => {
+      setLoggedIn(false);
+      setCurrentUser({ name: '', about: '', avatar: '', _id: '' });
+      // setCards({}); // видимо ломает загрузку обратно после повторного логина
+      setEmail('');
+      history.push('/sign-in');
+    }).catch(err => console.log);
   }
 
 
